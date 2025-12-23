@@ -4,7 +4,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const googleLoginBtn = document.getElementById('googleLoginBtn');
     const errorDiv = document.getElementById('login-error');
 
-    // Handler untuk tombol Login with Google.
+    // 1. Cek apakah pengguna sudah memiliki sesi aktif.
+    // Jika ya, jangan tampilkan halaman login, langsung arahkan ke aplikasi.
+    try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+            window.location.href = '/trackmate.html';
+            return; // Hentikan eksekusi script lebih lanjut jika sudah redirect.
+        }
+    } catch (e) {
+        console.error("Gagal memeriksa sesi:", e);
+    }
+
+    // 2. Handler untuk tombol Login with Google.
     googleLoginBtn?.addEventListener('click', async () => {
         if (typeof supabaseClient === 'undefined') {
             if (errorDiv) errorDiv.textContent = 'Supabase client tidak terdefinisi.';
@@ -18,12 +30,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Listener ini akan menangani pengalihan SETELAH login berhasil.
+    // 3. Listener ini akan menangani pengalihan SETELAH login berhasil.
     supabaseClient.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN' && session) {
-            // Gunakan app root untuk path yang lebih andal
-            const base = window.__getAppRoot ? window.__getAppRoot() : '/';
-            window.location.href = `${base}trackmate.html`;
+            window.location.href = '/trackmate.html';
         }
     });
 });

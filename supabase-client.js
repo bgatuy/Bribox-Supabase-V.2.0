@@ -22,89 +22,81 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ==================================================
 // INI ADALAH SCRIPT "PENJAGA GERBANG"
 // ==================================================
+// Cek jika kita TIDAK sedang di halaman login (yaitu bukan di index.html atau /)
+function __getAppRoot() {
+  const path = window.location.pathname;
+  return path.substring(0, path.lastIndexOf('/') + 1);
+}
 const path = window.location.pathname;
-const BASE = window.__getAppRoot(); // Gunakan fungsi global dari utils.js
-
 // Jika di admin.html, sembunyikan konten sampai verifikasi role selesai
 if (path.endsWith('/admin.html') || path.endsWith('admin.html')) {
   try { document.body.style.visibility = 'hidden'; } catch {}
 }
-
-// "Penjaga Gerbang" utama
-// Cek jika kita TIDAK sedang di halaman login
+const BASE = __getAppRoot();
 if (!path.endsWith('/') && !path.endsWith('/index.html')) {
-  supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    // Jika tidak ada sesi (baik saat load awal atau setelah logout), redirect ke login
+  // Gate cepat: kalau tidak ada session, langsung redirect (tanpa menunggu event)
+  supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
     if (!session) {
-      window.location.replace(`${BASE}index.html`);
-      return;
-    }
+      window.location.replace(BASE + 'index.html');
+    } else {
+      // =================================================================
+      // NEW: Centralized UI Initialization
+      // =================================================================
+      const user = session.user;
+      if (user) {
+          const meta = user.user_metadata || {};
+          const avatarUrl = meta.picture || meta.avatar_url;
+          const displayName = meta.full_name || meta.name || user.email || 'User';
+          
+          // Desktop UI
+          const userNameEl = document.getElementById('userName');
+          const userAvatarEl = document.getElementById('userAvatar');
+          if (userNameEl) userNameEl.textContent = displayName.split(' ')[0];
+          if (userAvatarEl && avatarUrl) userAvatarEl.src = avatarUrl;
 
-    // Jika ada sesi, kita lanjutkan
-    const user = session.user;
-    
-    // =================================================================
-    // Centralized UI Initialization
-    // =================================================================
-    if (user) {
-        const meta = user.user_metadata || {};
-        const avatarUrl = meta.picture || meta.avatar_url;
-        const displayName = meta.full_name || meta.name || user.email || 'User';
-        
-        // Desktop UI
-        const userNameEl = document.getElementById('userName');
-        const userAvatarEl = document.getElementById('userAvatar');
-        if (userNameEl) userNameEl.textContent = displayName.split(' ')[0];
-        if (userAvatarEl && avatarUrl) userAvatarEl.src = avatarUrl;
+          // Mobile UI
+          const mobileUserNameEl = document.getElementById('mobileUserName');
+          const mobileUserAvatarEl = document.getElementById('mobileUserAvatar');
+          if (mobileUserNameEl) mobileUserNameEl.textContent = displayName.split(' ')[0];
+          if (mobileUserAvatarEl && avatarUrl) mobileUserAvatarEl.src = avatarUrl;
 
-        // Mobile UI
-        const mobileUserNameEl = document.getElementById('mobileUserName');
-        const mobileUserAvatarEl = document.getElementById('mobileUserAvatar');
-        if (mobileUserNameEl) mobileUserNameEl.textContent = displayName.split(' ')[0];
-        if (mobileUserAvatarEl && avatarUrl) mobileUserAvatarEl.src = avatarUrl;
-
-        // Check for admin role and show link
-        try {
-            const { data: isAdmin } = await supabaseClient.rpc('is_admin');
-            if (isAdmin) {
-                document.documentElement.classList.add('is-admin'); // Tandai user sebagai admin
-                const navAdminLink = document.getElementById('navAdminLink');
-                if (navAdminLink) navAdminLink.classList.remove('hidden');
-                
-                const mobileNavAdminLink = document.getElementById('mobileNavAdminLink');
-                if (mobileNavAdminLink) {
-                    mobileNavAdminLink.classList.remove('hidden');
-                    mobileNavAdminLink.classList.add('flex');
-                }
-            }
-        } catch (adminCheckError) {
-            console.warn('Could not check admin status:', adminCheckError.message);
-        }
-    }
-
-    // =================================================================
-    // Verifikasi role untuk halaman admin
-    // =================================================================
-    if (path.endsWith('/admin.html') || path.endsWith('admin.html')) {
-      try {
-        const { data: isAdmin } = await supabaseClient.rpc('is_admin');
-        if (isAdmin === true) {
-          // Tampilkan konten jika admin
-          try { document.body.style.visibility = 'visible'; } catch {}
-        } else {
-          // Bukan admin, redirect ke halaman utama
-          window.location.replace(`${BASE}trackmate.html`);
-        }
-      } catch {
-        // Gagal cek role, redirect ke halaman utama
-        window.location.replace(`${BASE}trackmate.html`);
+          // Check for admin role and show link
+          try {
+              const { data: isAdmin } = await supabaseClient.rpc('is_admin');
+              if (isAdmin) {
+                  const navAdminLink = document.getElementById('navAdminLink');
+                  if (navAdminLink) navAdminLink.classList.remove('hidden');
+                  
+                  const mobileNavAdminLink = document.getElementById('mobileNavAdminLink');
+                  if (mobileNavAdminLink) {
+                      mobileNavAdminLink.classList.remove('hidden');
+                      mobileNavAdminLink.classList.add('flex');
+                  }
+              }
+          } catch (adminCheckError) {
+              console.warn('Could not check admin status:', adminCheckError.message);
+          }
       }
-    }
+      // =================================================================
+      // Jika halaman admin, verifikasi role lebih dulu
+      if (path.endsWith('/admin.html') || path.endsWith('admin.html')) {
+        try {
+          const { data: isAdmin } = await supabaseClient.rpc('is_admin');
+          if (isAdmin === true) {
+            try { document.body.style.visibility = 'visible'; } catch {}
+          } else {
+            // non-admin: langsung alihkan ke halaman utama tanpa alert
+            window.location.replace(BASE + 'trackmate.html');
+            return;
+          }
+        } catch {
+          // error cek role -> alihkan ke halaman utama
+          window.location.replace(BASE + 'trackmate.html');
+          return;
+        }
+      }
 
-    // =================================================================
-    // Setup auto logout saat idle (hanya sekali)
-    // =================================================================
-    if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+      // Auto logout saat idle lama (8 jam)
       if (!window.__idleTimeoutSetup) {
         window.__idleTimeoutSetup = true;
         const IDLE_LIMIT_MS = 8 * 60 * 60 * 1000; // 8 jam
@@ -112,21 +104,22 @@ if (!path.endsWith('/') && !path.endsWith('/index.html')) {
         const activityEvents = ['mousemove', 'keydown', 'scroll', 'touchstart', 'visibilitychange'];
         const resetIdleTimer = () => {
           clearTimeout(idleTimer);
-          idleTimer = setTimeout(() => {
-            // onAuthStateChange akan menangani redirect setelah signOut berhasil
-            supabaseClient.auth.signOut({ scope: 'local' }).catch(console.error);
-          }, IDLE_LIMIT_MS);          
+          idleTimer = setTimeout(async () => {
+            try { await supabaseClient.auth.signOut(); } catch {}
+            window.location.replace(BASE + 'index.html?reason=idle');
+          }, IDLE_LIMIT_MS);
         };
         activityEvents.forEach(evt => document.addEventListener(evt, resetIdleTimer, { passive: true }));
         resetIdleTimer();
       }
     }
   });
-} else {
-  // Ini adalah halaman login. Jika sudah ada sesi, redirect ke halaman utama.
-  supabaseClient.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-          window.location.replace(`${BASE}trackmate.html`);
-      }
+
+  // Listener tetap aktif untuk menangkap SIGNED_OUT dlsb.
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    // Jika logout dari tab lain, paksa redirect.
+    if (event === 'SIGNED_OUT' || (event === 'USER_DELETED' && !session)) {
+      window.location.replace(BASE + 'index.html');
+    }
   });
 }

@@ -13,23 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'Anda yakin ingin keluar dari sesi ini?'
         );
         if (confirmed) {
-            // Beri feedback visual bahwa proses sedang berjalan
-            window.showSpinner?.();
-            try {
-                // supabaseClient is global from supabase-client.js
-                const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
-                if (error) throw error;
-
-                // FIX: Jangan menunggu listener lain. Langsung redirect setelah berhasil.
-                // Ini membuat tombol logout lebih andal.
-                window.location.replace(window.__getAppRoot() + 'index.html');
-
-            } catch (err) {
-                // Jika terjadi error, tampilkan pesan dan sembunyikan spinner
-                console.error('Logout failed:', err);
-                window.showToast?.(`Logout gagal: ${err.message}`, 5000, 'warn');
-                window.hideSpinner?.();
-            }
+            // supabaseClient is global from supabase-client.js
+            await supabaseClient.auth.signOut();
         }
     };
     document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
