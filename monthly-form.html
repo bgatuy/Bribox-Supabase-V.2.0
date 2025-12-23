@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monthly Form - BRIBOX KANPUS</title>
+    <link rel="icon" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="./dist/style.css" rel="stylesheet">
+    <style>
+       /* Apply denser UI only on mobile screens */
+        @media (max-width: 767px) {
+            html {
+                /* Scales font size smoothly from ~13px on small phones to 16px on larger ones */
+                font-size: clamp(13px, 1.5vw + 8px, 16px);
+            }
+        }
+        body { background-color: #f1f5f9; }
+        .nav-link { position: relative; color: rgba(255,255,255,0.7); transition: all 0.2s; }
+        .nav-link:hover, .nav-link.active { color: #fff; }
+        .nav-link.active::after {
+            content: ''; position: absolute; bottom: -4px; left: 50%;
+            transform: translateX(-50%); width: 4px; height: 4px;
+            background-color: #F47B20; border-radius: 50%;
+        }
+        /* Custom styles for form inputs */
+        input, select, textarea {
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #00529C;
+            box-shadow: 0 0 0 3px rgba(0, 82, 156, 0.2);
+        }
+
+        /* Custom Dialog Styling */
+        dialog {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        dialog[open] {
+            opacity: 1; transform: translateY(0);
+        }
+        dialog::backdrop {
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            transition: backdrop-filter 0.3s ease, background-color 0.3s ease;
+        }
+    </style>
+</head>
+<body data-page="monthly" class="min-h-screen w-full font-sans text-slate-800 flex flex-col">
+
+    <!-- BACKGROUND & NAVIGATION -->
+    <div class="fixed top-0 left-0 w-full h-[350px] bg-brand-blue bg-pattern -z-10">
+        <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#f1f5f9] to-transparent"></div>
+    </div>
+    <nav id="mainNav" class="w-full sticky top-0 py-4 px-6 z-30 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="favicon.png" alt="BRIBOX Logo" class="w-10 h-10">
+                <div>
+                    <h1 class="text-white font-bold text-xl leading-tight tracking-tight">Application Report</h1>
+                    <p class="text-blue-300/60 text-[10px] tracking-wider uppercase font-semibold">BRIBOX KANPUS TEAM</p>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <a href="trackmate.html" class="nav-link">Trackmate</a>
+                <a href="appsheet.html" class="nav-link">AppSheet</a>
+                <a href="formserahterima.html" class="nav-link">Serah Terima</a>
+                <a href="monthly-form.html" class="nav-link active">Monthly Form</a>
+                <a href="monthly-data.html" class="nav-link">Monthly Data</a>
+                <a href="admin.html" id="navAdminLink" class="nav-link hidden">Admin</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="btnLogout" title="Logout" class="hidden sm:flex items-center gap-2 text-white/90 text-sm font-medium bg-white/10 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-sm hover:bg-white/20 transition">
+                    <img id="userAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=User" class="w-6 h-6 rounded-full bg-white/20 object-cover">
+                    <span id="userName">User</span>
+                </button>
+                <button id="mobileMenuBtn" class="md:hidden text-white/80 hover:text-white">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MOBILE MENU PANEL -->
+    <div id="mobileMenuPanel" class="fixed inset-0 z-50 invisible md:hidden">
+        
+        <!-- 1. BACKDROP (Blur & Darken) -->
+        <div 
+            id="menuBackdrop"
+            class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300"
+        ></div>
+
+        <!-- 2. SIDEBAR CONTAINER -->
+        <div 
+            id="menuSidebar"
+            class="fixed top-0 left-0 w-[85%] max-w-[320px] h-full shadow-2xl flex flex-col transform -translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-brand-blue/95 backdrop-blur-lg bg-pattern">
+            <!-- Content Container -->
+            <div class="relative z-10 flex flex-col h-full px-6 py-8">
+                
+                <!-- HEADER -->
+                <div class="flex items-center justify-between mb-10">
+                    <div class="flex items-center gap-3">
+                        <img src="favicon.png" alt="BRIBOX Logo" class="w-10 h-10">
+                        <div>
+                            <h1 class="text-white font-bold text-lg leading-tight">Application Report</h1>
+                            <p class="text-blue-300/60 text-[10px] tracking-wider uppercase font-semibold">BRIBOX KANPUS TEAM</p>
+                        </div>
+                    </div>
+                    <button id="mobileMenuCloseBtn" class="p-2 rounded-full bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all -mr-2">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- NAVIGATION ITEMS -->
+                <nav id="menuItems" class="flex flex-col gap-3 flex-1 overflow-y-auto">
+                    <a href="trackmate.html" class="group flex items-center gap-4 px-4 py-3.5 rounded-xl text-blue-100/70 hover:bg-white/5 hover:text-white transition-all hover:pl-5"><i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-blue-300 transition-colors"></i><span class="font-medium">Trackmate</span></a>
+                    <a href="appsheet.html" class="group flex items-center gap-4 px-4 py-3.5 rounded-xl text-blue-100/70 hover:bg-white/5 hover:text-white transition-all hover:pl-5"><i data-lucide="table" class="w-5 h-5 group-hover:text-blue-300 transition-colors"></i><span class="font-medium">AppSheet</span></a>
+                    <a href="formserahterima.html" class="group flex items-center gap-4 px-4 py-3.5 rounded-xl text-blue-100/70 hover:bg-white/5 hover:text-white transition-all hover:pl-5"><i data-lucide="file-check" class="w-5 h-5 group-hover:text-blue-300 transition-colors"></i><span class="font-medium">Serah Terima</span></a>
+                    <a href="monthly-form.html" class="group relative flex items-center gap-4 px-4 py-3.5 rounded-xl bg-white/10 border border-white/10 text-white shadow-lg backdrop-blur-md overflow-hidden transition-all"><div class="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-transparent opacity-100"></div><div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-brand-orange rounded-r-full shadow-[0_0_10px_rgba(244,123,32,0.6)]"></div><i data-lucide="calendar" class="w-5 h-5 text-brand-orange relative z-10"></i><span class="font-medium tracking-wide relative z-10">Monthly Form</span></a>
+                    <a href="monthly-data.html" class="group flex items-center gap-4 px-4 py-3.5 rounded-xl text-blue-100/70 hover:bg-white/5 hover:text-white transition-all hover:pl-5"><i data-lucide="database" class="w-5 h-5 group-hover:text-blue-300 transition-colors"></i><span class="font-medium">Monthly Data</span></a>
+                    <div class="border-t border-white/10 my-2"></div>
+                    <a href="admin.html" id="mobileNavAdminLink" class="hidden group items-center gap-4 px-4 py-3.5 rounded-xl text-blue-100/70 hover:bg-white/5 hover:text-white transition-all hover:pl-5"><i data-lucide="shield-check" class="w-5 h-5 group-hover:text-blue-300 transition-colors"></i><span class="font-medium">Admin Panel</span></a>
+                </nav>
+
+                <!-- FOOTER PROFILE -->
+                <div class="mt-6 pt-6 border-t border-white/5">
+                    <div id="mobileBtnLogout" class="bg-[#0f172a]/40 backdrop-blur-md rounded-2xl p-3 border border-white/5 flex items-center justify-between group cursor-pointer hover:bg-[#0f172a]/60 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <img id="mobileUserAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=User" class="w-10 h-10 rounded-full ring-2 ring-white/10">
+                            <div>
+                                <h4 id="mobileUserName" class="text-sm font-bold text-white group-hover:text-brand-orange transition-colors">User</h4>
+                                <p class="text-xs text-blue-300">Logout</p>
+                            </div>
+                        </div>
+                        <div class="p-2 rounded-lg text-rose-400/80">
+                            <i data-lucide="log-out" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="w-full max-w-5xl mx-auto px-4 pt-16 md:pt-20 pb-20">
+        <div class="text-center text-white mb-8 md:mb-10">
+            <h1 class="page-title-source" hidden>Monthly Report Form</h1>
+            <h1 class="text-3xl md:text-5xl font-bold tracking-tight mb-2">Input SPJ Harian</h1>
+            <p class="text-blue-100 text-base md:text-lg opacity-90">Data akan direkapitulasi di halaman Monthly Report.</p>
+        </div>
+
+        <!-- FORM CARD -->
+        <div class="bg-white rounded-2xl shadow-2xl shadow-blue-900/10">
+            <form id="formReport" autocomplete="on" class="p-6 md:p-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-5">
+                    <!-- Bulan & Tanggal -->
+                    <div class="lg:col-span-2">
+                        <label for="bulan" class="block text-sm font-medium text-slate-700 mb-1">Bulan <span class="text-red-500">*</span></label>
+                        <input type="month" id="bulan" name="bulan" required class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label for="tanggal" class="block text-sm font-medium text-slate-700 mb-1">Tanggal <span class="text-red-500">*</span></label>
+                        <input type="date" id="tanggal" name="tanggal" required class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    </div>
+
+                    <!-- Teknisi & Jenis Pekerjaan -->
+                    <div class="lg:col-span-2">
+                        <label for="teknisi" class="block text-sm font-medium text-slate-700 mb-1">Teknisi <span class="text-red-500">*</span></label>
+                        <select id="teknisi" name="teknisi" required class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"></select>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label for="jenis" class="block text-sm font-medium text-slate-700 mb-1">Jenis Pekerjaan</label>
+                        <select id="jenis" name="jenis" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white">
+                            <option value="Corrective Maintenance">Corrective Maintenance</option>
+                            <option value="Preventive Maintenance">Preventive Maintenance</option>
+                            <option value="Pekerjaan Tambahan">Pekerjaan Tambahan</option>
+                        </select>
+                    </div>
+
+                    <!-- Lokasi -->
+                    <div class="lg:col-span-2">
+                        <label for="lokasiDari" class="block text-sm font-medium text-slate-700 mb-1">Lokasi — Dari</label>
+                        <input id="lokasiDari" name="lokasiDari" placeholder="cth: Kantor Pusat" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label for="lokasiKe" class="block text-sm font-medium text-slate-700 mb-1">Lokasi — Ke</label>
+                        <input id="lokasiKe" name="lokasiKe" placeholder="cth: Menara BriLian / Div. PLO" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    </div>
+
+                    <!-- Detail & Status -->
+                    <div class="lg:col-span-3">
+                        <label for="detail" class="block text-sm font-medium text-slate-700 mb-1">Detail Pekerjaan</label>
+                        <input id="detail" name="detail" placeholder="cth: Troubleshooting Jaringan" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    </div>
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                        <select id="status" name="status" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white">
+                            <option value="Done">Done</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+
+                    <!-- Waktu -->
+                    <div class="lg:col-span-4 border-t border-slate-200 my-4"></div>
+                    
+                    <div>
+                        <label for="jamMasuk" class="block text-sm font-medium text-slate-700 mb-1">Jam Masuk Laporan</label>
+                        <input id="jamMasuk" name="jamMasuk" type="time" step="60" readonly class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-slate-100 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label for="jamBerangkat" class="block text-sm font-medium text-slate-700 mb-1">Jam Berangkat</label>
+                        <input id="jamBerangkat" name="jamBerangkat" type="time" step="60" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    </div>
+                    <div>
+                        <label for="jamTiba" class="block text-sm font-medium text-slate-700 mb-1">Jam Tiba</label>
+                        <input id="jamTiba" name="jamTiba" type="time" step="60" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    </div>
+                    <div>
+                        <label for="jamMulai" class="block text-sm font-medium text-slate-700 mb-1">Jam Mulai</label>
+                        <input id="jamMulai" name="jamMulai" type="time" step="60" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    </div>
+                    <div>
+                        <label for="jamSelesai" class="block text-sm font-medium text-slate-700 mb-1">Jam Selesai</label>
+                        <input id="jamSelesai" name="jamSelesai" type="time" step="60" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    </div>
+                    <div>
+                        <label for="durasiPenyelesaian" class="block text-sm font-medium text-slate-700 mb-1">Waktu Penyelesaian</label>
+                        <input id="durasiPenyelesaian" name="durasiPenyelesaian" type="text" placeholder="0:00" readonly class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-slate-100 cursor-not-allowed">
+                    </div>
+                    
+                    <!-- Jarak & Waktu Tempuh -->
+                    <div>
+                        <label for="jarak" class="block text-sm font-medium text-slate-700 mb-1">Jarak Tempuh (km)</label>
+                        <input id="jarak" name="jarak" type="number" inputmode="decimal" step="0.1" min="0" placeholder="0" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    </div>
+                    <div>
+                        <label for="waktuTempuh" class="block text-sm font-medium text-slate-700 mb-1">Waktu Tempuh</label>
+                        <input id="waktuTempuh" name="waktuTempuh" type="text" placeholder="0:00" readonly class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-slate-100 cursor-not-allowed">
+                    </div>
+
+                    <!-- Keterangan -->
+                    <div class="sm:col-span-2 lg:col-span-4">
+                        <label for="keterangan" class="block text-sm font-medium text-slate-700 mb-1">Keterangan</label>
+                        <textarea id="keterangan" name="keterangan" rows="3" placeholder="Tambahan detail jika perlu..." class="w-full border border-slate-300 rounded-lg px-3 py-2"></textarea>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Toolbar & Meta -->
+            <div class="p-6 bg-slate-50 border-t border-slate-200 rounded-b-2xl">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <button type="submit" form="formReport" class="text-sm font-semibold bg-brand-blue text-white px-5 py-2.5 rounded-lg shadow-sm hover:bg-brand-dark transition flex items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Submit</button>
+                        <button type="reset" form="formReport" class="text-sm font-semibold bg-white border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg hover:bg-slate-50 transition">Reset</button>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-sm text-slate-500 text-center sm:text-right">
+                            <strong id="countBulan" class="text-slate-700 font-bold">0</strong>
+                            <span>entri untuk bulan ini</span>
+                        </div>
+                        <a id="linkData" href="monthly-data.html" class="text-sm font-semibold bg-slate-100 text-slate-800 px-5 py-2.5 rounded-lg hover:bg-slate-200 transition flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i> Lihat Data</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 text-slate-400 text-sm">
+            <p>&copy; 2025 Web App Created By BangAtuy.</p>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION DIALOG (New) -->
+    <dialog id="confirmDialog" class="p-0 max-w-sm w-full bg-white rounded-2xl shadow-2xl backdrop:bg-slate-900/70 backdrop:backdrop-blur-sm opacity-0 translate-y-4">
+        <form method="dialog" class="flex flex-col h-full">
+            <div class="p-6 text-center">
+                <div class="w-14 h-14 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="alert-triangle" class="w-7 h-7"></i>
+                </div>
+                <h3 id="confirmTitle" class="text-lg font-bold text-slate-800">Konfirmasi Aksi</h3>
+                <p id="confirmMessage" class="text-sm text-slate-500 mt-2">Apakah Anda yakin?</p>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-200 grid grid-cols-2 gap-3">
+                <button value="cancel" type="submit" class="text-sm font-semibold bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-50 transition">Batal</button>
+                <button id="confirmOk" value="ok" class="text-sm font-semibold bg-rose-600 text-white px-4 py-2 rounded-lg hover:bg-rose-700 transition">Ya, Lanjutkan</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- GLOBAL SPINNER & TOAST -->
+    <div id="globalSpinner" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 items-center justify-center">
+        <div class="w-16 h-16 border-4 border-white/20 border-t-brand-orange rounded-full animate-spin"></div>
+    </div>
+    <div id="toast" class="fixed top-5 right-5 z-50 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 -translate-y-10 transition-all duration-300" role="status" aria-live="polite"></div>
+
+    
+    
+    <!-- Core Logic Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js" defer></script>
+    <script src="utils.js" defer></script>
+    <script src="ui.js" defer></script>
+    <script src="monthly-form.js" defer></script>
+</body>
+</html>

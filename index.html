@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BRIBOX KANPUS</title>
+    <link rel="icon" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="./dist/style.css" rel="stylesheet">
+    <style>
+        /* Apply denser UI only on mobile screens */
+        @media (max-width: 767px) {
+            html {
+                /* Scales font size smoothly from ~13px on small phones to 16px on larger ones */
+                font-size: clamp(13px, 1.5vw + 8px, 16px);
+            }
+        }
+        body {
+            background-color: #f1f5f9;
+        }
+        
+        /* Button Hover Effect */
+        .btn-google {
+            transition: all 0.2s ease;
+        }
+        .btn-google:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 82, 156, 0.3);
+        }
+    </style>
+</head>
+<body data-page="login" class="min-h-screen w-full font-sans flex flex-col items-center justify-center relative">
+
+    <!-- BACKGROUND -->
+    <div class="fixed top-0 left-0 w-full h-[50vh] bg-brand-blue bg-pattern -z-10">
+        <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#f1f5f9] to-transparent"></div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="w-full max-w-md px-6 animate-fade-in-up">
+        
+        <!-- LOGIN CARD -->
+        <div class="bg-white rounded-3xl shadow-2xl shadow-blue-900/10 border border-slate-100 p-8 md:p-10 text-center relative overflow-hidden">
+            
+            <!-- Decorative Top Gradient -->
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-brand-orange via-brand-blue to-brand-dark"></div>
+
+            <!-- LOGO & TITLE SECTION (INSIDE CARD) -->
+            <div class="flex flex-col items-center justify-center mb-8">
+                <img src="./favicon.png" alt="Logo" class="w-14 h-14 object-contain mb-4" onerror="this.style.display='none'; this.outerHTML='<div class=\'w-14 h-14 mb-4 flex items-center justify-center\'><i data-lucide=\'box\' class=\'w-8 h-8 text-slate-400\'></i></div>'">
+                 <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Application Report</h1>
+                 <p class="text-xs text-slate-400 font-bold tracking-widest uppercase mt-1">BRIBOX KANPUS TEAM</p>
+            </div>
+
+            <!-- GREETING -->
+            <div class="mb-8">
+                <p class="text-slate-500 text-sm">Silakan login menggunakan akun Google Anda untuk melanjutkan.</p>
+            </div>
+
+            <!-- Google Button -->
+            <button id="googleLoginBtn" class="btn-google w-full flex items-center justify-center gap-3 bg-brand-blue hover:bg-blue-700 text-white font-semibold py-3.5 px-4 rounded-xl transition-all group">
+                <div class="bg-white p-1.5 rounded-full flex items-center justify-center">
+                    <img src="https://www.google.com/favicon.ico" alt="Google" class="w-4 h-4">
+                </div>
+                <span>Masuk dengan Google</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0 transition-all duration-300"></i>
+            </button>
+
+            <!-- Error Message -->
+            <div id="login-error" class="mt-4 text-xs font-medium text-red-500 bg-red-50 py-2 px-3 rounded-lg hidden">
+                <!-- Error text will appear here -->
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-slate-50">
+                <p class="text-xs text-slate-400">
+                    Dengan masuk, Anda menyetujui <a href="#" class="text-brand-blue hover:underline">Ketentuan Layanan</a> & <a href="#" class="text-brand-blue hover:underline">Kebijakan Privasi</a> kami.
+                </p>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="text-center mt-8">
+            <p class="text-xs text-slate-400 font-medium">&copy; 2025 Web App Created By BangAtuy</p>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        lucide.createIcons();
+    </script>
+    
+    <!-- Supabase Logic Preserved -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="supabase-client.js" defer></script>
+    <script src="login.js" defer></script>
+
+</body>
+</html>
