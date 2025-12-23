@@ -13,8 +13,25 @@ document.addEventListener('DOMContentLoaded', () => {
             'Anda yakin ingin keluar dari sesi ini?'
         );
         if (confirmed) {
-            // supabaseClient is global from supabase-client.js
-            await supabaseClient.auth.signOut({ scope: 'local' });
+            // Beri feedback visual bahwa proses sedang berjalan
+            window.showSpinner?.();
+            try {
+                // supabaseClient is global from supabase-client.js
+                const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
+                if (error) {
+                    // Jika ada error dari Supabase, lempar agar bisa ditangkap
+                    throw error;
+                }
+                // Jika berhasil, onAuthStateChange di supabase-client.js akan menangani redirect.
+                // Kita tidak perlu melakukan apa-apa di sini.
+            } catch (err) {
+                // Jika terjadi error, tampilkan pesan dan sembunyikan spinner
+                console.error('Logout failed:', err);
+                window.showToast?.(`Logout gagal: ${err.message}`, 5000, 'warn');
+                window.hideSpinner?.();
+            }
+            // Spinner akan disembunyikan secara otomatis saat halaman redirect,
+            // jadi kita hanya perlu menyembunyikannya jika terjadi error.
         }
     };
     document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
