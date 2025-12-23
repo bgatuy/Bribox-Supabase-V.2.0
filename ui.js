@@ -4,58 +4,55 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Lucide icons
     lucide.createIcons();
 
-    // Flag (kunci) untuk mencegah eksekusi ganda dari "ghost click" di mobile.
-    let isLoggingOut = false;
+    // Ambil referensi kedua tombol logout di awal.
+    const btnLogout = document.getElementById('btnLogout');
+    const mobileBtnLogout = document.getElementById('mobileBtnLogout');
+
+    // Helper untuk mengunci/membuka kedua tombol secara bersamaan.
+    const setLogoutButtonsDisabled = (disabled) => {
+        if (btnLogout) btnLogout.disabled = disabled;
+        if (mobileBtnLogout) mobileBtnLogout.disabled = disabled;
+    };
 
     // --- 1. Logout Button ---
     const handleLogout = async (e) => {
         e?.preventDefault(); // Mencegah aksi default dari tombol
 
-        // Jika proses logout sudah berjalan (kunci aktif),
-        // abaikan panggilan fungsi tambahan ini.
-        if (isLoggingOut) {
+        // Gunakan state 'disabled' sebagai kunci yang paling andal.
+        // Jika salah satu tombol sudah disabled, berarti proses sedang berjalan.
+        if (btnLogout?.disabled || mobileBtnLogout?.disabled) {
             return;
         }
-        
-        // KUNCI PROSES DI SINI, SEBELUM AWAIT APAPUN untuk mencegah race condition.
-        isLoggingOut = true;
-        
+
+        // KUNCI KEDUA TOMBOL SEGERA untuk memblokir "ghost click" secara total.
+        setLogoutButtonsDisabled(true);
+
         const confirmed = await window.showConfirm('Konfirmasi Logout', 'Anda yakin ingin keluar dari sesi ini?');
         if (!confirmed) {
-            isLoggingOut = false; // Buka kembali kunci jika pengguna membatalkan.
+            setLogoutButtonsDisabled(false); // Buka kembali kunci jika pengguna membatalkan.
             return; // Pengguna membatalkan, tidak melakukan apa-apa
         }
 
         // Beri feedback visual bahwa proses sedang berjalan
         window.showSpinner?.();
 
-        try {
-            // Panggil signOut() tanpa opsi apa pun untuk logout LOKAL (hanya perangkat ini)
-            const { error } = await supabaseClient.auth.signOut();
+        // Panggil signOut() dan biarkan listener global yang menangani hasilnya.
+        const { error } = await supabaseClient.auth.signOut();
 
-            if (error) {
-                // Jika ada error dari Supabase, sembunyikan spinner dan tampilkan pesan
-                window.hideSpinner?.();
-                console.error('Logout error:', error);
-                window.showToast?.(`Logout Gagal: ${error.message}`, 5000, 'warn');
-                // Buka kembali kunci jika gagal, agar pengguna bisa mencoba lagi.
-                isLoggingOut = false;
-            } else {
-                // Jika berhasil, langsung arahkan ke halaman login.
-                // Kunci akan ter-reset otomatis saat halaman baru dimuat.
-                window.location.href = 'index.html';
-            }
-        } catch (err) {
-            // Tangani error tak terduga, sembunyikan spinner
+        // Jika ada error (misal: offline), proses tidak akan lanjut ke redirect.
+        // Maka kita perlu menangani UI di sini.
+        if (error) {
             window.hideSpinner?.();
-            console.error('Unexpected logout error:', err);
-            window.showToast?.('Terjadi kesalahan tak terduga saat logout.', 5000, 'error');
-            // Buka kembali kunci jika gagal.
-            isLoggingOut = false;
+            console.error('Logout error:', error);
+            window.showToast?.(`Logout Gagal: ${error.message}`, 5000, 'warn');
+            setLogoutButtonsDisabled(false); // Buka kunci agar bisa dicoba lagi.
         }
+        // Jika TIDAK ada error, kita tidak perlu melakukan apa-apa.
+        // Listener onAuthStateChange di supabase-client.js akan mengambil alih dan
+        // melakukan redirect. Halaman akan berpindah, dan spinner akan hilang.
     };
-    document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
-    document.getElementById('mobileBtnLogout')?.addEventListener('click', handleLogout);
+    btnLogout?.addEventListener('click', handleLogout);
+    mobileBtnLogout?.addEventListener('click', handleLogout);
 
     // --- 2. Mobile Menu Toggle ---
     const menuBtn = document.getElementById('mobileMenuBtn');
