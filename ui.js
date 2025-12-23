@@ -4,56 +4,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Lucide icons
     lucide.createIcons();
 
-    // Ambil referensi kedua tombol logout di awal.
-    const btnLogout = document.getElementById('btnLogout');
-    const mobileBtnLogout = document.getElementById('mobileBtnLogout');
-
-    // Helper untuk mengunci/membuka kedua tombol secara bersamaan.
-    const setLogoutButtonsDisabled = (disabled) => {
-        if (btnLogout) btnLogout.disabled = disabled;
-        if (mobileBtnLogout) mobileBtnLogout.disabled = disabled;
-    };
-
     // --- 1. Logout Button ---
     const handleLogout = async (e) => {
-        e?.preventDefault(); // Mencegah aksi default dari tombol
-
-        // Gunakan state 'disabled' sebagai kunci yang paling andal.
-        // Jika salah satu tombol sudah disabled, berarti proses sedang berjalan.
-        if (btnLogout?.disabled || mobileBtnLogout?.disabled) {
-            return;
+        e?.preventDefault();
+        // Use the globally available showConfirm from utils.js
+        const confirmed = await window.showConfirm(
+            'Konfirmasi Logout',
+            'Anda yakin ingin keluar dari sesi ini?'
+        );
+        if (confirmed) {
+            // supabaseClient is global from supabase-client.js
+            await supabaseClient.auth.signOut();
         }
-
-        // KUNCI KEDUA TOMBOL SEGERA untuk memblokir "ghost click" secara total.
-        setLogoutButtonsDisabled(true);
-
-        const confirmed = await window.showConfirm('Konfirmasi Logout', 'Anda yakin ingin keluar dari sesi ini?');
-        if (!confirmed) {
-            setLogoutButtonsDisabled(false); // Buka kembali kunci jika pengguna membatalkan.
-            return; // Pengguna membatalkan, tidak melakukan apa-apa
-        }
-
-        // Beri feedback visual bahwa proses sedang berjalan
-        window.showSpinner?.();
-
-        // Panggil signOut() dan biarkan listener global yang menangani hasilnya.
-        const { error } = await supabaseClient.auth.signOut();
-
-        // Jika ada error (misal: offline), proses tidak akan lanjut ke redirect.
-        // Maka kita perlu menangani UI di sini.
-        if (error) {
-            window.hideSpinner?.();
-            console.error('Logout error:', error);
-            window.showToast?.(`Logout Gagal: ${error.message}`, 5000, 'warn');
-            setLogoutButtonsDisabled(false); // Buka kunci agar bisa dicoba lagi.
-        }
-        // Jika TIDAK ada error, kita tidak perlu melakukan apa-apa.
-        // Listener onAuthStateChange di supabase-client.js akan mengambil alih dan
-        // melakukan redirect. Halaman akan berpindah, dan spinner akan hilang.
     };
-    btnLogout?.addEventListener('click', handleLogout);
-    mobileBtnLogout?.addEventListener('click', handleLogout);
-
+    document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
+    document.getElementById('mobileBtnLogout')?.addEventListener('click', handleLogout);
+    
     // --- 2. Mobile Menu Toggle ---
     const menuBtn = document.getElementById('mobileMenuBtn');
     const menuPanel = document.getElementById('mobileMenuPanel');
