@@ -1,5 +1,14 @@
 // ===== Shared Utilities & Constants =====
 
+/**
+ * Gets the application root path.
+ * @returns {string} The root path, e.g., "/" or "/my-app/".
+ */
+window.__getAppRoot = function() {
+  const path = window.location.pathname;
+  return path.substring(0, path.lastIndexOf('/') + 1);
+};
+
 // Satu sumber kebenaran untuk daftar lokasi.
 const LOCATIONS = [
   "BRI 1 Lt. Split","BRI 1 Lt. 2","BRI 1 Lt. 3","BRI 1 Lt. 4","BRI 1 Lt. 5","BRI 1 Lt. 6","BRI 1 Lt. 7","BRI 1 Lt. 8","BRI 1 Lt. 9","BRI 1 Lt. 10","BRI 1 Lt. 11","BRI 1 Lt. 12","BRI 1 Lt. 13","BRI 1 Lt. 14","BRI 1 Lt. 15","BRI 1 Lt. 16","BRI 1 Lt. 17","BRI 1 Lt. 18","BRI 1 Lt. 19","BRI 1 Lt. 20",

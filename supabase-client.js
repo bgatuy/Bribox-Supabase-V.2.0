@@ -22,14 +22,8 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ==================================================
 // INI ADALAH SCRIPT "PENJAGA GERBANG"
 // ==================================================
-// Cek jika kita TIDAK sedang di halaman login (yaitu bukan di index.html atau /)
-function __getAppRoot() {
-  const path = window.location.pathname;
-  return path.substring(0, path.lastIndexOf('/') + 1);
-}
-
 const path = window.location.pathname;
-const BASE = __getAppRoot();
+const BASE = window.__getAppRoot(); // Gunakan fungsi global dari utils.js
 
 // Jika di admin.html, sembunyikan konten sampai verifikasi role selesai
 if (path.endsWith('/admin.html') || path.endsWith('admin.html')) {

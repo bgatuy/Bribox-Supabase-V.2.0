@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Listener ini akan menangani pengalihan SETELAH login berhasil.
     supabaseClient.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN' && session) {
-            window.location.href = '/trackmate.html';
+            // Gunakan app root untuk path yang lebih andal
+            const base = window.__getAppRoot ? window.__getAppRoot() : '/';
+            window.location.href = `${base}trackmate.html`;
         }
     });
 });
