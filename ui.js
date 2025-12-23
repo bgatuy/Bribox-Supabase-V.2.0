@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isLoggingOut) {
             return;
         }
-
         
         // KUNCI PROSES DI SINI, SEBELUM AWAIT APAPUN untuk mencegah race condition.
         isLoggingOut = true;
@@ -27,8 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Pengguna membatalkan, tidak melakukan apa-apa
         }
 
-        // Aktifkan kunci untuk memblokir panggilan berikutnya.
-        isLoggingOut = true;
         // Beri feedback visual bahwa proses sedang berjalan
         window.showSpinner?.();
 
@@ -45,7 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 isLoggingOut = false;
             } else {
                 // Jika berhasil, langsung arahkan ke halaman login.
-                // Notifikasi sukses dihilangkan sesuai permintaan.
                 // Kunci akan ter-reset otomatis saat halaman baru dimuat.
                 window.location.href = 'index.html';
             }
@@ -60,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
     document.getElementById('mobileBtnLogout')?.addEventListener('click', handleLogout);
-    
 
     // --- 2. Mobile Menu Toggle ---
     const menuBtn = document.getElementById('mobileMenuBtn');
