@@ -6,15 +6,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. Logout Button ---
     const handleLogout = async (e) => {
-        e?.preventDefault();
-        // Use the globally available showConfirm from utils.js
-        const confirmed = await window.showConfirm(
-            'Konfirmasi Logout',
-            'Anda yakin ingin keluar dari sesi ini?'
-        );
-        if (confirmed) {
-            // supabaseClient is global from supabase-client.js
-            await supabaseClient.auth.signOut();
+        e?.preventDefault(); // Mencegah aksi default dari tombol
+
+        const confirmed = await window.showConfirm('Konfirmasi Logout', 'Anda yakin ingin keluar dari sesi ini?');
+        if (!confirmed) {
+            return; // Pengguna membatalkan, tidak melakukan apa-apa
+        }
+
+        // Beri feedback visual bahwa proses sedang berjalan
+        window.showSpinner?.();
+
+        try {
+            // Panggil signOut() tanpa opsi apa pun untuk logout LOKAL (hanya perangkat ini)
+            const { error } = await supabaseClient.auth.signOut();
+
+            if (error) {
+                // Jika ada error dari Supabase, sembunyikan spinner dan tampilkan pesan
+                window.hideSpinner?.();
+                console.error('Logout error:', error);
+                window.showToast?.(`Logout Gagal: ${error.message}`, 5000, 'warn');
+            } else {
+                // Jika berhasil, langsung arahkan ke halaman login.
+                // Notifikasi sukses dihilangkan sesuai permintaan.
+                window.location.href = 'index.html';
+            }
+        } catch (err) {
+            // Tangani error tak terduga, sembunyikan spinner
+            window.hideSpinner?.();
+            console.error('Unexpected logout error:', err);
+            window.showToast?.('Terjadi kesalahan tak terduga saat logout.', 5000, 'error');
         }
     };
     document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
