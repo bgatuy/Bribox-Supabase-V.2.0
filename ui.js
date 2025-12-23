@@ -4,15 +4,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Lucide icons
     lucide.createIcons();
 
+    // Flag (kunci) untuk mencegah eksekusi ganda dari "ghost click" di mobile.
+    let isLoggingOut = false;
+
     // --- 1. Logout Button ---
     const handleLogout = async (e) => {
         e?.preventDefault(); // Mencegah aksi default dari tombol
+
+        // Jika proses logout sudah berjalan (kunci aktif),
+        // abaikan panggilan fungsi tambahan ini.
+        if (isLoggingOut) {
+            return;
+        }
 
         const confirmed = await window.showConfirm('Konfirmasi Logout', 'Anda yakin ingin keluar dari sesi ini?');
         if (!confirmed) {
             return; // Pengguna membatalkan, tidak melakukan apa-apa
         }
 
+        // Aktifkan kunci untuk memblokir panggilan berikutnya.
+        isLoggingOut = true;
         // Beri feedback visual bahwa proses sedang berjalan
         window.showSpinner?.();
 
@@ -25,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.hideSpinner?.();
                 console.error('Logout error:', error);
                 window.showToast?.(`Logout Gagal: ${error.message}`, 5000, 'warn');
+                // Buka kembali kunci jika gagal, agar pengguna bisa mencoba lagi.
+                isLoggingOut = false;
             } else {
                 // Jika berhasil, langsung arahkan ke halaman login.
                 // Notifikasi sukses dihilangkan sesuai permintaan.
@@ -35,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
             window.hideSpinner?.();
             console.error('Unexpected logout error:', err);
             window.showToast?.('Terjadi kesalahan tak terduga saat logout.', 5000, 'error');
+            // Buka kembali kunci jika gagal.
+            isLoggingOut = false;
         }
     };
     document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
