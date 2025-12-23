@@ -105,7 +105,7 @@ if (!path.endsWith('/') && !path.endsWith('/index.html')) {
         const resetIdleTimer = () => {
           clearTimeout(idleTimer);
           idleTimer = setTimeout(async () => {
-            try { await supabaseClient.auth.signOut({ scope: 'local' }); } catch {}
+            try { await supabaseClient.auth.signOut(); } catch {}
             window.location.replace(BASE + 'index.html?reason=idle');
           }, IDLE_LIMIT_MS);
         };

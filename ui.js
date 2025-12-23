@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         if (confirmed) {
             // supabaseClient is global from supabase-client.js
-            await supabaseClient.auth.signOut({ scope: 'local' });
+            await supabaseClient.auth.signOut();
         }
     };
     document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
