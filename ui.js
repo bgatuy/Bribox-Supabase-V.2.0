@@ -17,8 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        
+        // KUNCI PROSES DI SINI, SEBELUM AWAIT APAPUN untuk mencegah race condition.
+        isLoggingOut = true;
+        
         const confirmed = await window.showConfirm('Konfirmasi Logout', 'Anda yakin ingin keluar dari sesi ini?');
         if (!confirmed) {
+            isLoggingOut = false; // Buka kembali kunci jika pengguna membatalkan.
             return; // Pengguna membatalkan, tidak melakukan apa-apa
         }
 
@@ -41,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Jika berhasil, langsung arahkan ke halaman login.
                 // Notifikasi sukses dihilangkan sesuai permintaan.
+                // Kunci akan ter-reset otomatis saat halaman baru dimuat.
                 window.location.href = 'index.html';
             }
         } catch (err) {
@@ -55,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
     document.getElementById('mobileBtnLogout')?.addEventListener('click', handleLogout);
     
+
     // --- 2. Mobile Menu Toggle ---
     const menuBtn = document.getElementById('mobileMenuBtn');
     const menuPanel = document.getElementById('mobileMenuPanel');
