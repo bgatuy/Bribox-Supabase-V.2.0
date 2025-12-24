@@ -1,12 +1,12 @@
 // supabase-client.js
 
 // Konfigurasi diambil dari env.js yang dibuat saat build
-const SUPABASE_URL = window.SUPABASE_CONFIG.URL;
-const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.ANON_KEY;
+const SUPABASE_URL = window.SUPABASE_CONFIG?.URL;
+const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG?.ANON_KEY;
 
-// Inisialisasi Supabase
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('Supabase ENV belum ter-load');
+}
 
 // ==================================================
 // UTIL
