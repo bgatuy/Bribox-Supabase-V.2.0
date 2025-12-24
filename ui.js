@@ -13,8 +13,19 @@ document.addEventListener('DOMContentLoaded', () => {
             'Anda yakin ingin keluar dari sesi ini?'
         );
         if (confirmed) {
-            // supabaseClient is global from supabase-client.js
-            await supabaseClient.auth.signOut();
+            try {
+                // supabaseClient is global from supabase-client.js
+                const { error } = await supabaseClient.auth.signOut();
+                // Jika signOut gagal karena sesi sudah tidak valid (mis. logout dari device lain),
+                // error akan dilempar dan kita tangkap di bawah.
+                if (error) throw error;
+            } catch (error) {
+                // Error ini wajar terjadi jika sesi sudah tidak valid.
+                // Kita tangkap agar tidak muncul sebagai "uncaught error" di console.
+                // Library Supabase akan tetap membersihkan sesi lokal, dan onAuthStateChange
+                // di supabase-client.js akan menangani redirect.
+                console.warn('Sign out failed, likely because session was already invalid:', error.message);
+            }
         }
     };
     document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
