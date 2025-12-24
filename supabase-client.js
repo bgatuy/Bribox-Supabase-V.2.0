@@ -105,12 +105,8 @@ if (!path.endsWith('/') && !path.endsWith('/index.html')) {
         const resetIdleTimer = () => {
           clearTimeout(idleTimer);
           idleTimer = setTimeout(async () => {
-            // Cukup panggil signOut(). Listener onAuthStateChange akan menangani
-            // redirect secara otomatis saat mendeteksi event 'SIGNED_OUT'.
-            // Ini mencegah duplikasi logika dan potensi race condition.
-            console.log('Idle timeout reached. Signing out...');
-            const { error } = await supabaseClient.auth.signOut();
-            if (error) console.warn('Idle sign out failed, session might have already been invalid.', error.message);
+            try { await supabaseClient.auth.signOut(); } catch {}
+            window.location.replace(BASE + 'index.html?reason=idle');
           }, IDLE_LIMIT_MS);
         };
         activityEvents.forEach(evt => document.addEventListener(evt, resetIdleTimer, { passive: true }));
