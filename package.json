@@ -1,20 +1,14 @@
 {
-  "name": "bribox-superbase",
+  "name": "bribox-supabase-v.2.0",
   "version": "1.0.0",
-  "main": "admin.js",
+  "description": "BRIBOX KANPUS Application Report web app.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tailwindcss -i ./style.css -o ./dist/style.css --minify",
     "watch": "tailwindcss -i ./style.css -o ./dist/style.css --watch"
   },
-  "keywords": [],
-  "author": "",
+  "author": "BangAtuy",
   "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "multiparty": "^4.2.3",
-    "pdf-parse": "^2.4.5"
-  },
   "devDependencies": {
     "tailwindcss": "^3.4.3"
   }
