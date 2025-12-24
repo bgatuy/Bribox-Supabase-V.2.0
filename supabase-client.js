@@ -1,7 +1,8 @@
 // supabase-client.js
 
-const SUPABASE_URL = 'https://yaajbonefhpdeehdkujr.supabase.co'; // <-- Pindahkan ke Environment Variable di production
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhYWpib25lZmhwZGVlaGRrdWpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMzA3MDAsImV4cCI6MjA4MDYwNjcwMH0.UjM0CrVxwKR-jiMNICqRx-Njgzw7SexmBNRCsrXHqKI'; // <-- Pindahkan ke Environment Variable di production
+// Konfigurasi diambil dari env.js yang dibuat saat build
+const SUPABASE_URL = window.SUPABASE_CONFIG.URL;
+const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.ANON_KEY;
 
 // Inisialisasi Supabase
 const { createClient } = supabase;

@@ -1,1 +1,2 @@
-/node_modules
+# Supabase config file
+env.js
