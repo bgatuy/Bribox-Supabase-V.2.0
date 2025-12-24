@@ -1,12 +1,8 @@
 // supabase-client.js
 
 // Konfigurasi diambil dari env.js yang dibuat saat build
-const SUPABASE_URL = window.SUPABASE_CONFIG?.URL;
-const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG?.ANON_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error('Supabase ENV belum ter-load');
-}
+const SUPABASE_URL = window.__ENV__.SUPABASE_URL;
+const SUPABASE_ANON_KEY = window.__ENV__.SUPABASE_ANON_KEY;
 
 // ==================================================
 // UTIL

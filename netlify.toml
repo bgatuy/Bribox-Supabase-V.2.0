@@ -1,0 +1,7 @@
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/env.js"
+  [headers.values]
+    Content-Type = "application/javascript"
