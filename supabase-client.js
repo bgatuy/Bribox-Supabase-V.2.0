@@ -1,146 +1,124 @@
-// ==================================================
 // supabase-client.js
-// ==================================================
 
 /**
- * ⚠️ CATATAN KEAMANAN
- * Jangan hardcode anon key di production.
- * Gunakan Environment Variables di hosting.
+ * =================================================================================
+ * SARAN KEAMANAN (PENTING): Gunakan Environment Variables untuk menyimpan kunci Supabase.
+ * 
+ * Jangan letakkan kunci API langsung di dalam kode (hardcode) seperti di bawah ini.
+ * Ini sangat berisiko karena siapa saja bisa melihatnya di browser dan menyalahgunakan
+ * akun Supabase Anda (menghabiskan kuota, memasukkan data sampah, dll).
+ * 
+ * Praktik terbaik adalah menyimpannya di fitur "Environment Variables" pada platform
+ * hosting Anda (misalnya Vercel, Netlify, atau GitHub Secrets untuk GitHub Pages).
+ * =================================================================================
  */
-const SUPABASE_URL = 'https://yaajbonefhpdeehdkujr.supabase.co';
-const SUPABASE_ANON_KEY = 'PASTE_ANON_KEY_DI_ENV_PRODUCTION';
+const SUPABASE_URL = 'https://yaajbonefhpdeehdkujr.supabase.co'; // <-- Pindahkan ke Environment Variable di production
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhYWpib25lZmhwZGVlaGRrdWpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMzA3MDAsImV4cCI6MjA4MDYwNjcwMH0.UjM0CrVxwKR-jiMNICqRx-Njgzw7SexmBNRCsrXHqKI'; // <-- Pindahkan ke Environment Variable di production
 
+// Inisialisasi Supabase client. Variabel `supabaseClient` akan tersedia secara global.
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ==================================================
-// HELPER
+// INI ADALAH SCRIPT "PENJAGA GERBANG"
 // ==================================================
-function getAppRoot() {
+// Cek jika kita TIDAK sedang di halaman login (yaitu bukan di index.html atau /)
+function __getAppRoot() {
   const path = window.location.pathname;
   return path.substring(0, path.lastIndexOf('/') + 1);
 }
-
-const BASE = getAppRoot();
 const path = window.location.pathname;
-
-// ==================================================
-// GATE AUTH (SEMUA HALAMAN KECUALI LOGIN)
-// ==================================================
-if (
-  !path.endsWith('/') &&
-  !path.endsWith('/index.html')
-) {
-
-  // Sembunyikan admin sampai role diverifikasi
-  if (path.endsWith('admin.html')) {
-    try {
-      document.body.style.visibility = 'hidden';
-    } catch {}
-  }
-
-  supabaseClient.auth.getSession().then(async (res) => {
-    const session = res?.data?.session;
-
-    // ==================================================
-    // TIDAK ADA SESSION → REDIRECT KE LOGIN
-    // ==================================================
+// Jika di admin.html, sembunyikan konten sampai verifikasi role selesai
+if (path.endsWith('/admin.html') || path.endsWith('admin.html')) {
+  try { document.body.style.visibility = 'hidden'; } catch {}
+}
+const BASE = __getAppRoot();
+if (!path.endsWith('/') && !path.endsWith('/index.html')) {
+  // Gate cepat: kalau tidak ada session, langsung redirect (tanpa menunggu event)
+  supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
     if (!session) {
       window.location.replace(BASE + 'index.html');
-      return;
-    }
+    } else {
+      // =================================================================
+      // NEW: Centralized UI Initialization
+      // =================================================================
+      const user = session.user;
+      if (user) {
+          const meta = user.user_metadata || {};
+          const avatarUrl = meta.picture || meta.avatar_url;
+          const displayName = meta.full_name || meta.name || user.email || 'User';
+          
+          // Desktop UI
+          const userNameEl = document.getElementById('userName');
+          const userAvatarEl = document.getElementById('userAvatar');
+          if (userNameEl) userNameEl.textContent = displayName.split(' ')[0];
+          if (userAvatarEl && avatarUrl) userAvatarEl.src = avatarUrl;
 
-    // ==================================================
-    // SET USER UI
-    // ==================================================
-    const user = session.user;
-    if (user) {
-      const meta = user.user_metadata || {};
-      const displayName =
-        meta.full_name ||
-        meta.name ||
-        user.email ||
-        'User';
+          // Mobile UI
+          const mobileUserNameEl = document.getElementById('mobileUserName');
+          const mobileUserAvatarEl = document.getElementById('mobileUserAvatar');
+          if (mobileUserNameEl) mobileUserNameEl.textContent = displayName.split(' ')[0];
+          if (mobileUserAvatarEl && avatarUrl) mobileUserAvatarEl.src = avatarUrl;
 
-      const avatarUrl =
-        meta.picture ||
-        meta.avatar_url ||
-        null;
-
-      const shortName = displayName.split(' ')[0];
-
-      const userNameEl = document.getElementById('userName');
-      const mobileUserNameEl = document.getElementById('mobileUserName');
-      const userAvatarEl = document.getElementById('userAvatar');
-      const mobileUserAvatarEl = document.getElementById('mobileUserAvatar');
-
-      if (userNameEl) userNameEl.textContent = shortName;
-      if (mobileUserNameEl) mobileUserNameEl.textContent = shortName;
-
-      if (avatarUrl) {
-        if (userAvatarEl) userAvatarEl.src = avatarUrl;
-        if (mobileUserAvatarEl) mobileUserAvatarEl.src = avatarUrl;
+          // Check for admin role and show link
+          try {
+              const { data: isAdmin } = await supabaseClient.rpc('is_admin');
+              if (isAdmin) {
+                  const navAdminLink = document.getElementById('navAdminLink');
+                  if (navAdminLink) navAdminLink.classList.remove('hidden');
+                  
+                  const mobileNavAdminLink = document.getElementById('mobileNavAdminLink');
+                  if (mobileNavAdminLink) {
+                      mobileNavAdminLink.classList.remove('hidden');
+                      mobileNavAdminLink.classList.add('flex');
+                  }
+              }
+          } catch (adminCheckError) {
+              console.warn('Could not check admin status:', adminCheckError.message);
+          }
       }
-    }
-
-    // ==================================================
-    // ADMIN GATE
-    // ==================================================
-    if (path.endsWith('admin.html')) {
-      try {
-        const { data: isAdmin } = await supabaseClient.rpc('is_admin');
-
-        if (!isAdmin) {
+      // =================================================================
+      // Jika halaman admin, verifikasi role lebih dulu
+      if (path.endsWith('/admin.html') || path.endsWith('admin.html')) {
+        try {
+          const { data: isAdmin } = await supabaseClient.rpc('is_admin');
+          if (isAdmin === true) {
+            try { document.body.style.visibility = 'visible'; } catch {}
+          } else {
+            // non-admin: langsung alihkan ke halaman utama tanpa alert
+            window.location.replace(BASE + 'trackmate.html');
+            return;
+          }
+        } catch {
+          // error cek role -> alihkan ke halaman utama
           window.location.replace(BASE + 'trackmate.html');
           return;
         }
-
-        document.body.style.visibility = 'visible';
-      } catch (err) {
-        window.location.replace(BASE + 'trackmate.html');
-        return;
       }
-    }
 
-    // ==================================================
-    // IDLE AUTO LOGOUT (LOCAL ONLY)
-    // ==================================================
-    if (!window.__idleSetup) {
-      window.__idleSetup = true;
-
-      const IDLE_LIMIT_MS = 8 * 60 * 60 * 1000; // 8 jam
-      let idleTimer;
-
-      const resetIdleTimer = () => {
-        clearTimeout(idleTimer);
-        idleTimer = setTimeout(async () => {
-          try {
-            // HAPUS SESSION LOKAL SAJA (ANTI 403)
-            await supabaseClient.auth.signOut({ scope: 'local' });
-          } catch {}
-          window.location.replace(BASE + 'index.html?reason=idle');
-        }, IDLE_LIMIT_MS);
-      };
-
-      [
-        'mousemove',
-        'keydown',
-        'scroll',
-        'touchstart',
-        'visibilitychange'
-      ].forEach(evt =>
-        document.addEventListener(evt, resetIdleTimer, { passive: true })
-      );
-
-      resetIdleTimer();
+      // Auto logout saat idle lama (8 jam)
+      if (!window.__idleTimeoutSetup) {
+        window.__idleTimeoutSetup = true;
+        const IDLE_LIMIT_MS = 8 * 60 * 60 * 1000; // 8 jam
+        let idleTimer;
+        const activityEvents = ['mousemove', 'keydown', 'scroll', 'touchstart', 'visibilitychange'];
+        const resetIdleTimer = () => {
+          clearTimeout(idleTimer);
+          idleTimer = setTimeout(async () => {
+            try { await supabaseClient.auth.signOut(); } catch {}
+            window.location.replace(BASE + 'index.html?reason=idle');
+          }, IDLE_LIMIT_MS);
+        };
+        activityEvents.forEach(evt => document.addEventListener(evt, resetIdleTimer, { passive: true }));
+        resetIdleTimer();
+      }
     }
   });
 
-  // ==================================================
-  // MULTI TAB / CROSS TAB LOGOUT SYNC
-  // ==================================================
-  supabaseClient.auth.onAuthStateChange((event) => {
-    if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+  // Listener tetap aktif untuk menangkap SIGNED_OUT dlsb.
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    // Jika logout dari tab lain, paksa redirect.
+    if (event === 'SIGNED_OUT' || (event === 'USER_DELETED' && !session)) {
       window.location.replace(BASE + 'index.html');
     }
   });
