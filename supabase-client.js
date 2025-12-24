@@ -1,7 +1,7 @@
 // supabase-client.js
 
-const SUPABASE_URL = 'https://yaajbonefhpdeehdkujr.supabase.co';
-const SUPABASE_ANON_KEY = 'PASTE_ANON_KEY_DI_ENV_PROD';
+const SUPABASE_URL = 'https://yaajbonefhpdeehdkujr.supabase.co'; // <-- Pindahkan ke Environment Variable di production
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhYWpib25lZmhwZGVlaGRrdWpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMzA3MDAsImV4cCI6MjA4MDYwNjcwMH0.UjM0CrVxwKR-jiMNICqRx-Njgzw7SexmBNRCsrXHqKI'; // <-- Pindahkan ke Environment Variable di production
 
 // Inisialisasi Supabase
 const { createClient } = supabase;
