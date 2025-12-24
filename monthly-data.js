@@ -24,7 +24,8 @@
       .select('*')
       .eq('month', month)
       .order('date', { ascending: true })
-      .order('created_at', { ascending: true });
+      .order('jam_berangkat', { ascending: true })
+      .order('created_at', { ascending: true }); // Tambahan: Jika jam sama, urutkan sesuai input
 
     // HANYA filter berdasarkan user_id jika BUKAN admin
     if (!isAdmin) {
@@ -78,8 +79,14 @@
         return hay.includes(q);
       });
     }
-    // urut input ASC (tanggal, lalu createdAt)
-    rows.sort((a,b)=>{ const ad=a.date||"", bd=b.date||""; if(ad!==bd) return ad.localeCompare(bd); return (a.created_at||"").localeCompare(b.created_at||""); });
+    // urut input ASC (tanggal, lalu jam_berangkat)
+    rows.sort((a,b)=>{ 
+      const ad=a.date||"", bd=b.date||""; 
+      if(ad!==bd) return ad.localeCompare(bd); 
+      const aj=a.jam_berangkat||"", bj=b.jam_berangkat||"";
+      if(aj!==bj) return aj.localeCompare(bj);
+      return (a.created_at||"").localeCompare(b.created_at||""); // Tie-breaker di client-side juga
+    });
 
     // simpan snapshot rows saat ini untuk keperluan edit inline
     try { window.__monthlyRows = Array.isArray(rows) ? rows.slice() : []; } catch {}
