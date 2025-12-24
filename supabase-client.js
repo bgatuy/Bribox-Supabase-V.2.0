@@ -1,8 +1,12 @@
 // supabase-client.js
 
 // Konfigurasi diambil dari env.js yang dibuat saat build
-const SUPABASE_URL = window.__ENV__.SUPABASE_URL;
-const SUPABASE_ANON_KEY = window.__ENV__.SUPABASE_ANON_KEY;
+const SUPABASE_URL = window.__ENV__?.SUPABASE_URL;
+const SUPABASE_ANON_KEY = window.__ENV__?.SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('Supabase ENV belum ter-load. Cek env.js dan Netlify ENV.');
+}
 
 // ==================================================
 // UTIL
