@@ -53,17 +53,17 @@
   const qInput = $("q");
   const tbody = $("tbody");
   const empty = $("empty");
-  const badgeMonth = $("badgeMonth");
+  const monthPicker = $("monthPicker");
   const btnExportXlsx = $("btnExportXlsx");
   const btnReset = $("btnReset");
 
-  // badge bulan
-  (function setBadge(){
-    const [yy,mm] = String(month).split("-").map(Number);
-    let label = month || "—";
-    if (!isNaN(yy) && !isNaN(mm)) label = new Date(yy,(mm||1)-1,1).toLocaleDateString("id-ID",{month:"long",year:"numeric"});
-    if (badgeMonth) badgeMonth.textContent = label;
-  })();
+  // setup month picker
+  if (monthPicker) {
+    monthPicker.value = month;
+    monthPicker.addEventListener("change", () => {
+      if (monthPicker.value) window.location.href = `?month=${monthPicker.value}`;
+    });
+  }
 
   // ===== filtering + render
   async function applyFilters(){
